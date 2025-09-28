@@ -5,16 +5,11 @@ from django.utils import timezone
 
 # Create your models here.
 class Reservation(models.Model):
-    STATUS_CHOICES = (
-        ('active', 'Active'),
-        ('fulfilled', 'Fulfilled'),
-        ('cancelled', 'Cancelled'),
-    )
-
     member = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="reservations")
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="reservations")
     reservation_date = models.DateTimeField(default=timezone.now)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    # status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    priority = models.PositiveIntegerField()
 
     class Meta:
         constraints = [
@@ -24,4 +19,4 @@ class Reservation(models.Model):
         ]
 
     def __str__(self):
-        return f"Reservation: {self.book.title} by {self.member.username} ({self.status})"
+        return f"Reservation: {self.book.title} by {self.member.first_name}"

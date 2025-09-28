@@ -25,8 +25,16 @@ class BorrowViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({"error": "Book not found"}, status=status.HTTP_404_NOT_FOUND)
 
         if not book.availability_status:
-            return Response({"error": "Book is not available"}, status=status.HTTP_400_BAD_REQUEST)
-
+            reservation_url = f"/api/v1/reservations/make/"
+            return Response(
+                {
+                    "error": "Book is not available for borrowing.",
+                    "message": "You can make a reservation for this book.",
+                    "reservation_link": request.build_absolute_uri(reservation_url),
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         # Create borrow record
         borrow = BorrowRecord.objects.create(book=book, member=request.user)
         book.available_copies = book.available_copies-1
