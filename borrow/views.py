@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from borrow.models import BorrowRecord
 from borrow.serializers import BorrowSerializer, ReturnBorrowSerializer
 from book.models import Book
@@ -9,8 +10,11 @@ from django.utils import timezone
 class BorrowViewSet(viewsets.ReadOnlyModelViewSet):
     # queryset = BorrowRecord.objects.all()
     serializer_class = BorrowSerializer
+    permission_classes = [IsAuthenticated]
     def get_queryset(self):
-        qs = BorrowRecord.objects.filter(member=self.request.user)
+        if getattr(self, 'swagger_fake_view', False):
+            return BorrowRecord.objects.none()
+        qs = BorrowRecord.objects.select_related('member', 'book').filter(member=self.request.user)
         qs = qs.filter(status="borrowed")
         return qs
     

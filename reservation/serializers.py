@@ -8,6 +8,7 @@ User = get_user_model()
 
 class MemberSerializer(serializers.ModelSerializer):
     class Meta:
+        ref_name = 'ReservationMemberSerializer'
         model = User
         fields = ["id", "username", "email"]
 

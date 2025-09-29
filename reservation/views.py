@@ -1,9 +1,12 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
 from reservation.models import Reservation
 from reservation.serializers import ReservationSerializer, FulfillCancelSerializer
 from borrow.models import BorrowRecord
+from api.permissions import IsLibrarian
 
 def updatePriorityQueue(self, reservation):
     self.reservation = reservation
@@ -14,10 +17,16 @@ def updatePriorityQueue(self, reservation):
 
 class ReservationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ReservationSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Reservation.objects.none()
+        # For Librarian
+        if IsLibrarian().has_permission(self.request, self):
+            Reservation.objects.select_related('member', 'book').all()
         # Reservations of the logged-in user
-        return Reservation.objects.filter(member=self.request.user).order_by("-reservation_date")
+        return Reservation.objects.select_related('member', 'book').filter(member=self.request.user).order_by("-reservation_date")
 
     @action(detail=False, methods=["post"], url_path="make")
     def make_reservation(self, request):

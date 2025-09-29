@@ -6,6 +6,7 @@ from book.serializers import BookSerializer
 
 class MemberSerializer(serializers.ModelSerializer):
     class Meta:
+        ref_name = 'BorrowMemberSerializer'
         model = CustomUser
         fields = ['id', 'first_name', 'email']
 
