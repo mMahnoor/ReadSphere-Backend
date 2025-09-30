@@ -9,32 +9,23 @@ from book.models import Book, Category, Author, Review
 from book.serializers import BookSerializer, CategorySerializer, AuthorSerializer, ReviewSerializer
 from book.paginations import DefaultPagination
 from book.filters import BookFilter
-from api.permissions import IsAdminOrReadOnly, IsReviewAuthorOrReadOnly, IsLibrarian, IsAdmin
+from api.permissions import IsLibrarianOrAdminOrReadOnly, IsReviewAuthorOrReadOnly
 
 class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [IsAuthenticated()]  
-        return [IsLibrarian() | IsAdmin()]
+    permission_classes = [IsLibrarianOrAdminOrReadOnly]
 
 class AuthorViewSet(ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [IsAuthenticated()]  
-        return [IsLibrarian() | IsAdmin()]
+    permission_classes = [IsLibrarianOrAdminOrReadOnly]
 
 
 class BookViewSet(ModelViewSet):
     queryset = Book.objects.select_related('category', 'author').all()
     serializer_class = BookSerializer
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [IsAuthenticated()]  
-        return [IsLibrarian() | IsAdmin()]
+    permission_classes = [IsLibrarianOrAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = BookFilter
     pagination_class = DefaultPagination
